@@ -8,6 +8,7 @@ LFS_TOOLCHAIN="tmp/toolchain"
 LFS_SRC_DIR="usr/src"
 LFS_PKG_TAR="lfs-packages-${LFS_VERSION}.tar"
 LFS_ROOT=$(pwd)
+LFS_NPROC=printf "%s" $(nproc)
 
 source ./functions.sh
 
