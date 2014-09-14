@@ -56,35 +56,36 @@ function install_gcc {
 
     pushd ${build_dir} >&3
         echo -n "configure ${pkg}"
-        ${src}/configure \
-            --target=${LFS_TARGET} \
-            --prefix=${prefix} \
-            --with-sysroot=$LFS_ROOT \
-            --with-newlib \
-            --without-headers \
-            --with-local-prefix=${abs_chain} \
+        ${src}/configure                                         \
+            --target=${LFS_TARGET}                               \
+            --prefix=${prefix}                                   \
+            --with-sysroot=$LFS_ROOT                             \
+            --with-newlib                                        \
+            --without-headers                                    \
+            --with-local-prefix=${abs_chain}                     \
             --with-native-system-header-dir=${abs_chain}/include \
-            --disable-nls \
-            --disable-shared \
-            --disable-multilib \
-            --disable-decimal-float \
-            --disable-threads \
-            --disable-libatomic \
-            --disable-libgomp \
-            --disable-libitm \
-            --disable-libmudflap \
-            --disable-libquadmath \
-            --disable-libsanitizer \
-            --disable-libssp \
-            --disable-libstdc++-v3 \
-            --enable-languages=c,c++ \
-            --with-mpfr-include=$(pwd)/../${pkg}/mpfr/src \
+            --disable-nls                                        \
+            --disable-shared                                     \
+            --disable-multilib                                   \
+            --disable-decimal-float                              \
+            --disable-threads                                    \
+            --disable-libatomic                                  \
+            --disable-libgomp                                    \
+            --disable-libitm                                     \
+            --disable-libmudflap                                 \
+            --disable-libquadmath                                \
+            --disable-libsanitizer                               \
+            --disable-libssp                                     \
+            --disable-libstdc++-v3                               \
+            --enable-languages=c,c++                             \
+            --with-mpfr-include=$(pwd)/../${pkg}/mpfr/src        \
             --with-mpfr-lib=$(pwd)/mpfr/src/.libs 1>&3 2>&3
 
         echo " :: done."
         echo -n "make ${pkg} (will take a while)"
-        make -j${LFS_NPROC} 1>&3 2>&3 && make install 1>&3 2>&3
-        ln -s libgcc.a $(${abs_chain}/${LFS_TARGET}-gcc -print-libgcc-file-name | sed 's/libgcc/&_eh/')
+        make 1>&3 2>&3
+        make install 1>&3 2>&3
+        ln -s libgcc.a $(${abs_chain}/bin/${LFS_TARGET}-gcc -print-libgcc-file-name | sed 's/libgcc/&_eh/')
         echo " :: done."
     popd >&3
 }
@@ -105,9 +106,9 @@ function prepare_gcc {
     extract_pkg ${mpc_pkg} ${mpc_atype}
 
     local gcc_dir="${LFS_SRC_DIR}/${LFS_VERSION}/${gcc_pkg}"
-    mv "${LFS_SRC_DIR}/${LFS_VERSION}/${mpc_pkg}" "${gcc_dir}/mpc"
-    mv "${LFS_SRC_DIR}/${LFS_VERSION}/${mpfr_pkg}" "${gcc_dir}/mpfr"
-    mv "${LFS_SRC_DIR}/${LFS_VERSION}/${gmp_pkg}" "${gcc_dir}/gmp"
+    #mv "${LFS_SRC_DIR}/${LFS_VERSION}/${mpc_pkg}" "${gcc_dir}/mpc"
+    #mv "${LFS_SRC_DIR}/${LFS_VERSION}/${mpfr_pkg}" "${gcc_dir}/mpfr"
+    #mv "${LFS_SRC_DIR}/${LFS_VERSION}/${gmp_pkg}" "${gcc_dir}/gmp"
 
     set_gcc_toolchain ${gcc_dir}
 }
