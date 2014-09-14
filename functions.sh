@@ -30,12 +30,12 @@ function install_binutils {
 
     pushd ${build_dir} >&3
         echo -n "configure ${pkg}"
-        ${src}/configure                           \
-            --prefix="${prefix}"                   \
-            --with-sysroot="${LFS_ROOT}"           \
-            --with-lib-path="${prefix}/lib"        \
-            --target="${LFS_TARGET}"               \
-            --disable-nls                          \
+        ${src}/configure                    \
+            --prefix="${prefix}"            \
+            --with-sysroot="${LFS_ROOT}"    \
+            --with-lib-path="${prefix}/lib" \
+            --target="${LFS_TARGET}"        \
+            --disable-nls                   \
             --disable-werror  1>&3 2>&3
         echo " :: done."
         echo -n "make ${pkg} (will take a while)"
@@ -136,6 +136,57 @@ function set_gcc_toolchain {
     popd  >&3
 }
 
+function install_linux_headers {
+    local pkg="linux-3.13.3"
+    local atype="tar.xz"
+    local include_dir="${LFS_ROOT}/${LFS_TOOLCHAIN}/include"
+
+    extract_pkg ${pkg} ${atype}
+
+    echo -n "installing linux headers"
+    pushd ${LFS_SRC_DIR}/${LFS_VERSION}/${pkg} >&3
+        mkdir -p ${include_dir}
+        make mrproper >&3
+        make INSTALL_HDR_PATH=dest headers_install >&3
+        cp -r dest/include/* ${include_dir}
+    popd >&3
+    echo " :: done."
+}
+
+function install_glibc {
+    local pkg="glibc-2.19"
+    local atype="tar.xz"
+    local fhc_patch="glibc-2.19-fhs-1.patch"
+    local build_dir="${LFS_BUILD_DIR}/glibc"
+    local prefix="${LFS_ROOT}/${LFS_TOOLCHAIN}"
+
+    mkdir -p "${build_dir}"
+
+    extract_pkg ${pkg} ${atype}
+
+    pushd ${LFS_SRC_DIR}/${LFS_VERSION}/${pkg} >&3
+        patch -b -p1 -s -i ${LFS_ROOT}/${LFS_SRC_DIR}/${LFS_VERSION}/${fhc_patch}
+    popd >&3
+
+    pushd ${build_dir} >&3
+        ${LFS_ROOT}/${LFS_SRC_DIR}/${LFS_VERSION}/${pkg}/configure                           \
+            --prefix=${prefix}                                                               \
+            --host=$LFS_TARGET                                                               \
+            --build=$(${LFS_ROOT}/${LFS_SRC_DIR}/${LFS_VERSION}/${pkg}/scripts/config.guess) \
+            --disable-profile                                                                \
+            --enable-kernel=2.6.32                                                           \
+            --with-headers=${prefix}/include                                                 \
+            libc_cv_forced_unwind=yes                                                        \
+            libc_cv_ctors_header=yes                                                         \
+            libc_cv_c_cleanup=yes 1>&3 2>&3
+
+        echo -n "make ${pkg} (will take a while)"
+        make #1>&3 2>&3
+        make install #1>&3 2>&3
+        echo " :: done."
+    popd >&3
+}
+
 function setup_dirs {
     if [ ${LFS_DEBUG} -eq 1 ]; then
         exec 3>&1
@@ -176,15 +227,15 @@ function prepare {
         exit 1
     fi
 
+    echo -n "extracting packages"
     for pkg in ${pkg_list}; do
         if [ -f $pkg ]; then
             echo "$(basename $pkg) found"
         else
-            echo -n "extracting $(basename $pkg) from archive"
             tar xfpv "${LFS_PKG_TAR}" ${pkg} >&3
-            echo " :: done."
         fi
     done
+    echo " :: done."
 
     popd  >&3
 }

@@ -17,5 +17,7 @@ setup_dirs
 prepare
 install_binutils
 install_gcc
+install_linux_headers
+install_glibc
 
 exit 0
