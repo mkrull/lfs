@@ -140,7 +140,7 @@ function setup_dirs {
     if [ ${LFS_DEBUG} -eq 1 ]; then
         exec 3>&1
     else
-        exec 3>/dev/null
+        exec 3>${LFS_BUILD_LOG}
     fi
 
     echo "creating directories"

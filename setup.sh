@@ -9,6 +9,7 @@ LFS_SRC_DIR="usr/src"
 LFS_PKG_TAR="lfs-packages-${LFS_VERSION}.tar"
 LFS_ROOT=$(pwd)
 LFS_NPROC=printf "%s" $(nproc)
+LFS_BUILD_LOG="${LFS_ROOT}/build.log"
 
 source ./functions.sh
 
